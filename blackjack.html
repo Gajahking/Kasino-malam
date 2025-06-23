@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blackjack - Kasino Malam</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/zn2BffN.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100%;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 { margin-top: 20px; color: #00ff00; }
+    button, input {
+      margin: 8px;
+      padding: 10px 16px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+    }
+    button {
+      background-color: #00ff00;
+      color: black;
+      font-weight: bold;
+    }
+    .cards {
+      font-size: 24px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🃏 Blackjack</h1>
+  <p>Saldo: <span id="saldo">1000</span></p>
+  <div>
+    <button onclick="adjustBet(-10)">−</button>
+    <span id="betDisplay">100</span>
+    <button onclick="adjustBet(10)">+</button>
+  </div>
+  <button onclick="startGame()">Mulai</button>
+  <div class="cards" id="status"></div>
+  <div id="buttons" style="display:none;">
+    <button onclick="hit()">Hit</button>
+    <button onclick="stand()">Stand</button>
+  </div>
+
+  <script>
+    let saldo = localStorage.getItem("saldo") ? parseInt(localStorage.getItem("saldo")) : 1000;
+    let player = [], dealer = [], bet = 100, gameOver = false;
+
+    document.getElementById("saldo").textContent = saldo;
+    document.getElementById("betDisplay").textContent = bet;
+
+    function adjustBet(val) {
+      bet += val;
+      if (bet < 10) bet = 10;
+      if (bet > 500) bet = 500;
+      document.getElementById("betDisplay").textContent = bet;
+    }
+
+    function drawCard() {
+      return Math.floor(Math.random() * 10) + 2;
+    }
+
+    function startGame() {
+      if (bet > saldo) return alert("Saldo tidak cukup!");
+      player = [drawCard(), drawCard()];
+      dealer = [drawCard()];
+      saldo -= bet;
+      gameOver = false;
+      update();
+      document.getElementById("buttons").style.display = "block";
+    }
+
+    function hit() {
+      if (gameOver) return;
+      player.push(drawCard());
+      update();
+      if (sum(player) > 21) endGame("💥 Bust! Kamu kalah.");
+    }
+
+    function stand() {
+      while (sum(dealer) < 17) dealer.push(drawCard());
+      const pSum = sum(player), dSum = sum(dealer);
+      if (dSum > 21 || pSum > dSum) saldo += bet * 2, endGame("🎉 Kamu menang!");
+      else if (pSum === dSum) saldo += bet, endGame("🤝 Seri.");
+      else endGame("💀 Dealer menang.");
+    }
+
+    function sum(cards) {
+      return cards.reduce((a, b) => a + b, 0);
+    }
+
+    function update() {
+      document.getElementById("status").innerHTML = 
+        `Kartu Kamu: ${player.join(', ')} (Total: ${sum(player)})<br>` +
+        `Kartu Dealer: ${dealer.join(', ')}${gameOver ? ' (Total: ' + sum(dealer) + ')' : ''}`;
+      document.getElementById("saldo").textContent = saldo;
+    }
+
+    function endGame(msg) {
+      gameOver = true;
+      update();
+      document.getElementById("status").innerHTML += `<br><br><strong>${msg}</strong>`;
+      document.getElementById("buttons").style.display = "none";
+      localStorage.setItem("saldo", saldo);
+    }
+  </script>
+</body>
+</html>
