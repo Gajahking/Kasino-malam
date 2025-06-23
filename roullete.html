@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Roulette - Kasino Malam</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/8VvwA1x.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100%;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 20px;
+      color: #ff4444;
+    }
+    input, button {
+      margin: 8px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #ff4444;
+      color: white;
+      font-weight: bold;
+    }
+    .wheel {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎡 Roulette</h1>
+  <p>Saldo: <span id="saldo">1000</span></p>
+  <label>Taruhan Nomor (0–36):</label><br>
+  <input type="number" id="angka" min="0" max="36"><br>
+  <div>
+    <button onclick="adjustBet(-10)">−</button>
+    <span id="betDisplay">100</span>
+    <button onclick="adjustBet(10)">+</button>
+  </div>
+  <button onclick="spin()">🎡 Putar</button>
+  <div class="wheel" id="hasil"></div>
+
+  <script>
+    let saldo = localStorage.getItem("saldo") ? parseInt(localStorage.getItem("saldo")) : 1000;
+    let bet = 100;
+    const saldoEl = document.getElementById("saldo");
+    const hasilEl = document.getElementById("hasil");
+
+    saldoEl.textContent = saldo;
+    document.getElementById("betDisplay").textContent = bet;
+
+    function adjustBet(val) {
+      bet += val;
+      if (bet < 10) bet = 10;
+      if (bet > 500) bet = 500;
+      document.getElementById("betDisplay").textContent = bet;
+    }
+
+    function spin() {
+      const pilihan = parseInt(document.getElementById("angka").value);
+      if (isNaN(pilihan) || pilihan < 0 || pilihan > 36 || bet > saldo) {
+        alert("Input tidak valid atau saldo kurang!");
+        return;
+      }
+
+      const hasil = Math.floor(Math.random() * 37);
+      saldo -= bet;
+      let pesan = `Bola berhenti di angka: ${hasil}<br>`;
+
+      if (hasil === pilihan) {
+        const menang = bet * 35;
+        saldo += menang;
+        pesan += `🎉 Selamat! Menang ${menang}`;
+      } else {
+        pesan += "💀 Kamu kalah.";
+      }
+
+      saldoEl.textContent = saldo;
+      hasilEl.innerHTML = pesan;
+      localStorage.setItem("saldo", saldo);
+    }
+  </script>
+</body>
+</html>
