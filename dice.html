@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dadu - Kasino Malam</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: url('https://i.imgur.com/dXq2xhW.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100%;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 { margin-top: 20px; color: #00ffcc; }
+    input, button {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+    }
+    button {
+      background-color: #00ffcc;
+      color: black;
+      font-weight: bold;
+    }
+    .result {
+      font-size: 20px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎲 Game Dadu</h1>
+  <p>Saldo: <span id="saldo">1000</span></p>
+  <label>Angka (4–18):</label><br>
+  <input type="number" id="angka" min="4" max="18"><br>
+  <div>
+    <button onclick="adjustBet(-10)">−</button>
+    <span id="betDisplay">100</span>
+    <button onclick="adjustBet(10)">+</button>
+  </div>
+  <button onclick="rollDice()">🎲 Lempar</button>
+  <div class="result" id="hasil"></div>
+
+  <script>
+    let saldo = localStorage.getItem("saldo") ? parseInt(localStorage.getItem("saldo")) : 1000;
+    let bet = 100;
+    const payoutMap = {
+      4: 25, 5: 20, 6: 18, 7: 15, 8: 12, 9: 10,
+      10: 9, 11: 9, 12: 10, 13: 12, 14: 15,
+      15: 18, 16: 20, 17: 25, 18: 30
+    };
+
+    document.getElementById("saldo").textContent = saldo;
+    document.getElementById("betDisplay").textContent = bet;
+
+    function adjustBet(val) {
+      bet += val;
+      if (bet < 10) bet = 10;
+      if (bet > 500) bet = 500;
+      document.getElementById("betDisplay").textContent = bet;
+    }
+
+    function rollDice() {
+      const angka = parseInt(document.getElementById("angka").value);
+      if (isNaN(angka) || angka < 4 || angka > 18 || bet > saldo) {
+        alert("Input tidak valid.");
+        return;
+      }
+
+      const d1 = Math.ceil(Math.random() * 6);
+      const d2 = Math.ceil(Math.random() * 6);
+      const d3 = Math.ceil(Math.random() * 6);
+      const total = d1 + d2 + d3;
+
+      saldo -= bet;
+      let pesan = `🎲 ${d1} + ${d2} + ${d3} = ${total}<br>`;
+
+      if (total === angka) {
+        const payout = payoutMap[angka] || 10;
+        const menang = bet * payout;
+        saldo += menang;
+        pesan += `🎉 Menang ${menang} (x${payout})`;
+      } else {
+        pesan += "💀 Kamu kalah.";
+      }
+
+      document.getElementById("hasil").innerHTML = pesan;
+      document.getElementById("saldo").textContent = saldo;
+      localStorage.setItem("saldo", saldo);
+    }
+  </script>
+</body>
+</html>
